@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Japanese Rising Sun -->
+  <circle cx="50" cy="50" r="32" fill="#E60012" />
+  
+  <!-- Torii Gate -->
+  <g fill="currentColor">
+    <!-- Top curved bar (Kasagi) -->
+    <path d="M 18 34 Q 50 28 82 34 L 82 39 Q 50 35 18 39 Z" />
+    
+    <!-- Left Pillar -->
+    <polygon points="33,39 39,39 36,75 30,75" />
+    
+    <!-- Right Pillar -->
+    <polygon points="61,39 67,39 70,75 64,75" />
+    
+    <!-- Second horizontal bar (Nuki) -->
+    <rect x="25" y="50" width="50" height="5" />
+    
+    <!-- Center tie (Gakuzuka) -->
+    <rect x="47" y="39" width="6" height="11" />
+  </g>
+</svg>

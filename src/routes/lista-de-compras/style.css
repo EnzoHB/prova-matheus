@@ -1,0 +1,398 @@
+:root {
+    --background: #fbf9f8;
+    --on-background: #1b1c1c;
+    --primary: #006d40;
+    --on-primary: #ffffff;
+    --on-primary-fixed-variant: #00522f;
+    --primary-container: #2bb673;
+    --on-primary-container: #004024;
+    --surface-container-lowest: #ffffff;
+    --surface-container-high: #eae8e7;
+    --surface-container-highest: #e4e2e1;
+    --surface-bright: #fbf9f8;
+    --surface-variant: #e4e2e1;
+    --on-surface: #1b1c1c;
+    --on-surface-variant: #3d4a40;
+    --outline-variant: #bccabd;
+    --outline: #6d7a6f;
+    --tertiary: #b81d27;
+    --tertiary-container: #ff7570;
+    --secondary: #5c5f5e;
+}
+
+:global(body) {
+    background-color: var(--background);
+    color: var(--on-background);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+.main {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding-bottom: 6rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    height: 3.5rem;
+    color: var(--primary);
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    z-index: 40;
+    margin-bottom: 1rem;
+}
+
+.header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Formulário de Adição (Card Superior) */
+.controls {
+    background: var(--surface-container-lowest);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    border: 1px solid rgba(188, 202, 189, 0.3);
+    position: relative;
+    z-index: 10;
+}
+
+.card-shadow {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.input-group {
+    display: contents; 
+}
+
+.input-main, .input-qtd, .input-select {
+    background: var(--surface-bright);
+    border: 1px solid var(--outline-variant);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    color: var(--on-surface);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.input-main:focus, .input-qtd:focus, .input-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+.input-main::placeholder, .input-qtd::placeholder {
+    color: rgba(61, 74, 64, 0.5);
+}
+
+.input-main {
+    flex: 1 1 100%;
+}
+
+.input-qtd {
+    width: 5rem;
+    text-align: center;
+}
+
+.input-select {
+    flex: 1;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23626564' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    width: 3rem;
+    height: 3rem;
+    flex-shrink: 0;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--on-primary-fixed-variant);
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+.btn-primary svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.status-bar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.25rem;
+}
+
+.badge {
+    background: var(--surface-container-highest);
+    color: var(--on-surface-variant);
+    border: 1px solid rgba(188, 202, 189, 0.3);
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.badge:nth-child(2) {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    border: none;
+}
+.badge:nth-child(2) strong {
+    color: inherit;
+}
+
+.badge.pendentes {
+    background: rgba(255, 117, 112, 0.2);
+    color: var(--tertiary);
+    border-color: rgba(255, 117, 112, 0.3);
+    margin-left: auto;
+}
+.badge.pendentes strong {
+    color: inherit;
+}
+
+.itens {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin-top: 0.5rem;
+}
+
+.item {
+    background: var(--surface-container-lowest);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid rgba(188, 202, 189, 0.2);
+    transition: box-shadow 0.2s, background 0.2s, opacity 0.2s, border-color 0.2s;
+}
+
+.item:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.item.focado {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.item.riscado {
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.checkbox-wrapper {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+}
+
+.checkbox-wrapper input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.custom-checkbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--outline-variant);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.checkbox-wrapper input:hover + .custom-checkbox {
+    border-color: var(--primary);
+}
+
+.checkbox-wrapper input:checked + .custom-checkbox {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.checkbox-wrapper input:checked + .custom-checkbox::after {
+    content: "";
+    width: 5px;
+    height: 10px;
+    border-right: 2px solid var(--on-primary);
+    border-bottom: 2px solid var(--on-primary);
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.inline-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0.25rem;
+    margin-left: -0.25rem;
+    font-family: inherit;
+    color: inherit;
+    text-overflow: ellipsis;
+    transition: background 0.2s, border-radius 0.2s;
+}
+
+.inline-input:focus {
+    background: rgba(228, 226, 225, 0.5); 
+    border-radius: 0.25rem;
+}
+
+.text-bold {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    width: 100%;
+}
+
+.riscado .text-bold {
+    text-decoration: line-through;
+    color: var(--on-surface-variant);
+}
+
+.item-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.125rem;
+}
+
+.riscado .item-meta {
+    opacity: 0.8;
+}
+
+.text-meta {
+    font-size: 0.75rem;
+    color: var(--secondary);
+}
+
+.riscado .text-meta {
+    text-decoration: line-through;
+}
+
+.width-auto {
+    width: 2rem;
+    text-align: center;
+}
+
+.select-inline {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto;
+}
+
+.btn-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--outline);
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-icon.btn-danger:hover {
+    background: rgba(255, 117, 112, 0.2);
+    color: var(--tertiary);
+}
+
+.btn-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    text-align: center;
+    color: var(--on-surface-variant);
+    font-size: 1rem;
+}
