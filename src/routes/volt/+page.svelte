@@ -10,7 +10,6 @@
     import { Label } from '#lib/components/ui/label';
     import { Badge } from '#lib/components/ui/badge';
     import * as Card from '#lib/components/ui/card/index.ts';
-    import { id } from 'zod/locales';
   
     // --- STATE & INTERACTIVITY ---
     let currentTime = $state('');
@@ -22,14 +21,13 @@
     let newsletterMsg = $state('');
     let newsletterSuccess = $state(false);
   
-    const categories = ['Todas', 'Tecnologia', 'Negócios', 'Ciência', 'Cultura', 'Opinião'];
+    const categories = ['Todas', 'Audio', 'Acessórios', 'Casa', 'Vestível'];
   
     const categoryColors = {
-      'Tecnologia': '#2F6BEB',
-      'Negócios': '#C07A12',
-      'Ciência': '#0F8C7E',
-      'Cultura': '#B8348F',
-      'Opinião': '#5A6472'
+      'Audio': '#6D28D9',
+      'Acessórios': '#C07A12',
+      'Casa': '#0F8C7E',
+      'Vestível ': '#B8348F',
     };
   
     // --- NEWS DATA (12 total items: 1 Hero + 3 Secondary + 8+ Grid Articles) ---
@@ -65,96 +63,14 @@
       }
     ];
   
-    const allGridArticles = [
-      {
-        id: 5,
-        title: 'CSS ganha novos recursos de container queries que simplificam a responsividade',
-        category: 'Tecnologia',
-        author: 'Rafael Costa',
-        date: '21 set',
-        readTime: '4 min',
-        initial: 'T'
-      },
-      {
-        id: 6,
-        title: 'JavaScript: o que esperar da próxima versão da linguagem',
-        category: 'Tecnologia',
-        author: 'Beatriz Nunes',
-        date: '21 set',
-        readTime: '5 min',
-        initial: 'T'
-      },
-      {
-        id: 7,
-        title: 'Startups brasileiras de software crescem 18% no primeiro semestre',
-        category: 'Negócios',
-        author: 'Diego Prado',
-        date: '20 set',
-        readTime: '3 min',
-        initial: 'N'
-      },
-      {
-        id: 8,
-        title: 'Baterias de estado sólido avançam em testes de laboratório',
-        category: 'Ciência',
-        author: 'Camila Rocha',
-        date: '19 set',
-        readTime: '6 min',
-        initial: 'C'
-      },
-      {
-        id: 9,
-        title: 'Podcasts independentes batem recorde de audiência no país',
-        category: 'Cultura',
-        author: 'Lucas Mendes',
-        date: '18 set',
-        readTime: '4 min',
-        initial: 'C'
-      },
-      {
-        id: 10,
-        title: 'Acessibilidade digital vira exigência em novos projetos públicos',
-        category: 'Tecnologia',
-        author: 'Helena Souza',
-        date: '18 set',
-        readTime: '5 min',
-        initial: 'T'
-      },
-      {
-        id: 11,
-        title: 'O custo invisível da complexidade no desenvolvimento moderno',
-        category: 'Opinião',
-        author: 'Fernando Lira',
-        date: '17 set',
-        readTime: '7 min',
-        initial: 'O'
-      },
-      {
-        id: 12,
-        title: 'Fusão entre gigantes de nuvem redefine o mercado corporativo latino',
-        category: 'Negócios',
-        author: 'Patrícia Viana',
-        date: '16 set',
-        readTime: '5 min',
-        initial: 'N'
-      },
-      {
-        id: 13,
-        title: 'Telescópio orbital registra moléculas orgânicas em exoplaneta próximo',
-        category: 'Ciência',
-        author: 'Roberto Salles',
-        date: '15 set',
-        readTime: '8 min',
-        initial: 'C'
-      }
-    ];
+    
 
     // Carrinho de compras
 
     const gerenciador = new Gerenciador();
     const carrinho = new Carrinho();    
 
-    let formProduto = $state({ id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '' });
+    let formProduto = $state({ id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '', avaliacao: 0 });
     let editando = $state(false);
 
     // Estado do cliente
@@ -162,17 +78,17 @@
     let feedbackMsg = $state('');
 
     onMount(async () => {
-        const dadosLocais = localStorage.getItem('restaurante_dados');
+        const dadosLocais = localStorage.getItem('volt_dados');
         if (dadosLocais) {
             const { produtos, pedidos } = JSON.parse(dadosLocais);
-            gerenciador.produtos = produtos.map((p: any) => new Produto(p.id, p.nome, p.descricao, p.preco, p.categoria, p.imagem));
+            gerenciador.produtos = produtos.map((p: any) => new Produto(p.id, p.nome, p.descricao, p.preco, p.categoria, p.imagem, p.avaliacao));
             gerenciador.pedidos = pedidos;
         } else {
             // Se não houver cache, busca os dados da API (+server.ts)
             try {
-                const res = await fetch('/sistema-de-restaurante/api/');
+                const res = await fetch('/volt/api/');
                 const produtosIniciais = await res.json();
-                produtosIniciais.forEach((p: any) => gerenciador.adicionarProduto(new Produto(p.id, p.nome, p.descricao, p.preco, p.categoria, p.imagem)));
+                produtosIniciais.forEach((p: any) => gerenciador.adicionarProduto(new Produto(p.id, p.nome, p.descricao, p.preco, p.categoria, p.imagem, p.avalicao)));
                 salvarDados();
             } catch (e) {
                 console.log("Iniciando sem dados da API");
@@ -181,7 +97,7 @@
     });
 
     function salvarDados() {
-        localStorage.setItem('restaurante_dados', JSON.stringify({
+        localStorage.setItem('volt_dados', JSON.stringify({
             produtos: gerenciador.produtos,
             pedidos: gerenciador.pedidos
         }));
@@ -192,37 +108,37 @@
         setTimeout(() => feedbackMsg = '', 3000);
     }
 
-    // --- OPERAÇÕES CRUD DE PRODUTOS --- //
-    function salvarProduto(e: Event) {
-        e.preventDefault();
-        if (editando) {
-            gerenciador.atualizarProduto(formProduto.id, { ...formProduto });
-            mostrarFeedback('Produto atualizado com sucesso!');
-        } else {
-            const novoProduto = new Produto(
-                crypto.randomUUID(), formProduto.nome, formProduto.descricao, formProduto.preco, formProduto.categoria, formProduto.imagem
-            );
-            gerenciador.adicionarProduto(novoProduto);
-            mostrarFeedback('Produto cadastrado com sucesso!');
-        }
-        formProduto = { id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '' };
-        editando = false;
-        salvarDados();
-    }
+    // // --- OPERAÇÕES CRUD DE PRODUTOS --- //
+    // function salvarProduto(e: Event) {
+    //     e.preventDefault();
+    //     if (editando) {
+    //         gerenciador.atualizarProduto(formProduto.id, { ...formProduto });
+    //         mostrarFeedback('Produto atualizado com sucesso!');
+    //     } else {
+    //         const novoProduto = new Produto(
+    //             crypto.randomUUID(), formProduto.nome, formProduto.descricao, formProduto.preco, formProduto.categoria, formProduto.imagem, formProduto.avaliacao
+    //         );
+    //         gerenciador.adicionarProduto(novoProduto);
+    //         mostrarFeedback('Produto cadastrado com sucesso!');
+    //     }
+    //     formProduto = { id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '', avaliacao: 0 };
+    //     editando = false;
+    //     salvarDados();
+    // }
 
-    function prepararEdicao(produto: Produto) {
-        formProduto = { ...produto };
-        editando = true;
-    }
+    // function prepararEdicao(produto: Produto) {
+    //     formProduto = { ...produto };
+    //     editando = true;
+    // }
 
-    function removerProduto(id: string) {
-        if (confirm('Atenção: Tem certeza que deseja remover este produto do cardápio?')) {
-            gerenciador.removerProduto(id);
-            carrinho.removerItem(id);
-            salvarDados();
-            mostrarFeedback('Produto removido.');
-        }
-    }
+    // function removerProduto(id: string) {
+    //     if (confirm('Atenção: Tem certeza que deseja remover este produto do cardápio?')) {
+    //         gerenciador.removerProduto(id);
+    //         carrinho.removerItem(id);
+    //         salvarDados();
+    //         mostrarFeedback('Produto removido.');
+    //     }
+    // }
 
     // --- OPERAÇÕES DO CARRINHO --- //
     function adicionarAoCarrinho(produto: Produto) {
@@ -254,19 +170,20 @@
         salvarDados();
         mostrarFeedback('Pedido finalizado com sucesso!');
     }
+    
 
 
 
     // -- Carrinho de compras
   
     // --- REACTIVE FILTERING (Category + Live Search) ---
-    let filteredArticles = $derived(allGridArticles.filter(article => {
-      const matchesCat = selectedCategory === 'Todas' || article.category === selectedCategory;
-      const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase().trim());
+    let filteredProducts = $derived(gerenciador.produtos.filter(produto => {
+      const matchesCat = selectedCategory === 'Todas' || produto.categoria === selectedCategory;
+      const matchesSearch = produto.nome.toLowerCase().includes(searchQuery.toLowerCase().trim());
       return matchesCat && matchesSearch;
     }))
   
-    let visibleArticles = $derived(filteredArticles.slice(0, visibleCount));
+    let visibleProducts = $derived(filteredProducts.slice(0, visibleCount));
   
     // --- FUNCTIONS ---
     function updateClock() {
@@ -348,7 +265,7 @@
       <div class="container masthead-inner">
         <div class="brand-nav">
           <a href="#top" class="logo" onclick={event => (event.preventDefault(), selectCategory('Todas'))}>
-            Latên<span class="logo-dot">·</span>cia
+            Volt
           </a>
           <nav aria-label="Navegação principal">
             <ul class="nav-links">
@@ -498,12 +415,12 @@
               <defs>
                 <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#2563EB" />
-                  <stop offset="100%" stop-color="#7DA2F8" />
+                  <stop offset="100%" stop-color="#611dfe" />
                 </linearGradient>
               </defs>
               <rect width="600" height="340" fill="url(#heroGrad)" rx="10" />
               <circle cx="480" cy="110" r="145" fill="rgba(255,255,255,0.08)" />
-              <text x="48" y="255" font-family="Newsreader, serif" font-size="220" font-weight="700" fill="#FFFFFF">
+              <text x="48" y="255" font-size="220" font-weight="700" fill="#FFFFFF">
                 {heroArticle.initial}
               </text>
             </svg>
@@ -532,7 +449,7 @@
                   <span class="meta">{item.category} · {item.date}</span>
                 </div>
               </li>
-            {/each}
+            {/each}Tec
           </ol>
         </aside> -->
       </section>
@@ -558,60 +475,44 @@
           </div>
         </div>
   
-        {#if visibleArticles.length > 0}
+        {#if visibleProducts.length > 0}
           <div class="articles-grid">
-            <!-- {#each visibleArticles as article (article.id)} -->
-            {#each gerenciador.produtos.slice(0, 4) as produto (produto.id)}
-              <Card.Root class="snap-center shrink-0 w-[280px] overflow-hidden group hover:shadow-md transition-all">
-                  <div class="h-48 w-full overflow-hidden">
-                      <img src={produto.imagem} alt={produto.nome} class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+            {#each visibleProducts as produto (produto.id)}
+              <Card.Root class="snap-center shrink-0 w-[350px] overflow-hidden group hover:shadow-md transition-all">
+                  <div class="thumbnail card-thumb">
+                    <svg
+                      viewBox="0 0 400 250"
+                      role="img"
+                      aria-label="Miniatura do produto {produto.categoria}: {produto.nome}"
+                    >
+                      <defs>
+                        <linearGradient id="cardGrad-{produto.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#6D28D9" />
+                          <stop offset="100%" stop-color="#6D28D9" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="400" height="250" fill="url(#cardGrad-{produto.id})" rx="8" />
+                      <circle cx="320" cy="70" r="95" fill="rgba(255,255,255,0.08)" />
+                      <text x="30" y="190" font-size="150" font-weight="700" fill="#FFFFFF">
+                        {produto.nome.slice(0, 1)}
+                      </text>
+                    </svg>
                   </div>
                   <Card.Content class="p-4 pt-5">
                       <Badge variant="secondary" class="mb-2">{produto.categoria}</Badge>
                       <Card.Title class="text-lg line-clamp-1">{produto.nome}</Card.Title>
-                      <p class="text-primary font-bold text-xl mt-2">
+                      
+                      <p class="font-bold text-xl mt-2">
                           {produto.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </p>
                   </Card.Content>
                   <Card.Footer class="p-4 pt-0">
-                      <Button onclick={() => adicionarAoCarrinho(produto)} class="w-full gap-2">
+                      <Button onclick={() => adicionarAoCarrinho(produto)} class="w-full gap-2 bg-primary">
                           <Plus class="h-4 w-4" /> Adicionar
                       </Button>
                   </Card.Footer>
               </Card.Root>
             {/each}
-              <!-- <article class="news-card">
-                <div class="thumbnail card-thumb">
-                  <svg
-                    viewBox="0 0 400 250"
-                    role="img"
-                    aria-label="Miniatura da editoria {article.category}: {article.title}"
-                  >
-                    <defs>
-                      <linearGradient id="cardGrad-{article.id}" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#2563EB" />
-                        <stop offset="100%" stop-color="#7DA2F8" />
-                      </linearGradient>
-                    </defs>
-                    <rect width="400" height="250" fill="url(#cardGrad-{article.id})" rx="8" />
-                    <circle cx="320" cy="70" r="95" fill="rgba(255,255,255,0.08)" />
-                    <text x="30" y="190" font-family="Newsreader, serif" font-size="150" font-weight="700" fill="#FFFFFF">
-                      {article.initial}
-                    </text>
-                  </svg>
-                </div>
-  
-                <div class="category-bar" style="background-color: {categoryColors[article.category]}">
-                  {article.category.toUpperCase()}
-                </div>
-  
-                <h3 class="card-title">
-                  <a href="#noticia-{article.id}">{article.title}</a>
-                </h3>
-  
-                <p class="meta">{article.author} · {article.date} · {article.readTime}</p>
-              </article> -->
-            <!-- {/each} -->
           </div>
         {:else}
           <p class="empty-results">
@@ -619,7 +520,7 @@
           </p>
         {/if}
   
-        {#if visibleCount < filteredArticles.length}
+        {#if visibleCount < filteredProducts.length}
           <div class="load-more-container">
             <button class="load-more-btn" onclick={loadMore}>
               Carregar mais
@@ -629,10 +530,10 @@
       </section>
   
       <!-- NEWSLETTER SECTION: REGEX EMAIL VALIDATION + FEEDBACK -->
-      <section class="newsletter-box" aria-labelledby="heading-newsletter">
-        <h2 id="heading-newsletter" class="newsletter-title">Receba a Latência no seu e-mail</h2>
+      <section class="newsletter-box bg-secondary" aria-labelledby="heading-newsletter">
+        <h2 id="heading-newsletter" class="newsletter-title">Ganhe 10% na primeira compra</h2>
         <p class="newsletter-desc">
-          Um resumo das principais notícias de tecnologia toda sexta-feira.<br />
+          Assine a newsletter e receba o cupom de boas-vindas, além das ofertas da semana<br />
           Sem spam.
         </p>
   
@@ -656,17 +557,74 @@
     </main>
   
     <!-- FOOTER -->
-    <footer class="site-footer">
-      <div class="container footer-inner">
-        <p class="copyright">© 2026 Latência · Portal-modelo para fins didáticos</p>
-        <nav aria-label="Links institucionais">
-          <ul class="footer-links">
-            <li><a href="#sobre">Sobre</a></li>
-            <li><a href="#contato" >Contato</a></li>
-            <li><a href="#privacidade" >Privacidade</a></li>
-            <li><a href="#termos">Termos</a></li>
-          </ul>
-        </nav>
+    <footer class="border-t bg-muted/20 py-12 px-4 md:px-6">
+      <div class="mx-auto w-full max-w-7xl">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-4 lg:gap-12">
+          <!-- Branding / About -->
+          <div class="flex flex-col gap-4">
+            <a href="/" class="text-xl font-bold tracking-tight">Volt</a>
+            <p class="text-sm text-muted-foreground">
+              Os melhores produtos do mercado somente na maior distribuira de eletro-eletrônicos do Brasil
+            </p>
+          </div>
+  
+          <!-- Sitemap / Links -->
+          <div class="flex flex-col gap-4">
+            <h3 class="font-semibold text-foreground">Links Rápidos</h3>
+            <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
+              <li>
+                <a href="/cardapio" class="hover:text-foreground transition-colors">Cardápio</a>
+              </li>
+              <li>
+                <a href="/evento" class="hover:text-foreground transition-colors">Evento</a>
+              </li>
+              <li>
+                <a href="/galeria" class="hover:text-foreground transition-colors">Galeria</a>
+              </li>
+              <li>
+                <a href="/culinaria" class="hover:text-foreground transition-colors">Galeria</a>
+              </li>
+              <li>
+                <a href="/ingressos" class="hover:text-foreground transition-colors">Ingressos</a>
+              </li>
+            </ul>
+          </div>
+  
+          <!-- Contact Info -->
+          <div class="flex flex-col gap-4">
+            <h3 class="font-semibold text-foreground">Contato</h3>
+            <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
+              <li>enzohhb@gmail.com</li>
+              <li>(11) 991494-2391</li>
+              <li>São Paulo, SP</li>
+            </ul>
+          </div>
+  
+          <!-- Social Media -->
+          <div class="flex flex-col gap-4">
+            <h3 class="font-semibold text-foreground">Redes Sociais</h3>
+            <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
+              <li>
+                <a href="https://instagram.com" target="_blank" class="hover:text-foreground transition-colors">Instagram</a>
+              </li>
+              <li>
+                <a href="https://twitter.com" target="_blank" class="hover:text-foreground transition-colors">X (Twitter)</a>
+              </li>
+              <li>
+                <a href="https://tiktok.com" target="_blank" class="hover:text-foreground transition-colors">TikTok</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+  
+        <!-- Bottom Bar -->
+        <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-sm text-muted-foreground md:flex-row">
+          <p>© {new Date().getFullYear()} Enzo. Todos os direitos reservados.</p>
+          <div class="flex gap-4">
+            <a href="/termos" class="hover:text-foreground transition-colors">Termos de Uso</a>
+            <a href="/privacidade" class="hover:text-foreground transition-colors">Privacidade</a>
+          </div>
+        </div>
       </div>
     </footer>
   </div>
@@ -675,13 +633,13 @@
     /* --- CSS CUSTOM PROPERTIES (SPEC PALETTE & TYPOGRAPHY) --- */
     .portal-wrapper {
       --paper: #FFFFFF;
-      --ink: #151710;
-      --slate: #5A6472;
-      --mist: #EEF0F3;
-      --line: #E2E5EA;
-      --signal: #E5372A;
+      --ink: #181A2A;
+      --slate: #6B7280;
+      --mist: #E5E7EB;
+      --line: #e7e5eb;
+      --signal: #6D28D9;
   
-      --font-serif: 'Newsreader', Georgia, serif;
+      --font-serif: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   
       background-color: var(--paper);
