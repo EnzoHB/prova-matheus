@@ -57,6 +57,24 @@ export const GET: RequestHandler = async () => {
             avalicao: 4.2,
             categoria: 'Casa',
             image: "about:blank"
+        },
+        {
+            id: '7',
+            nome: 'Webcam Full HD Clara',
+            descricao: 'Sem descrição',
+            preco: 199.90,
+            avalicao: 3,
+            categoria: 'Acessórios',
+            image: "about:blank"
+        },
+        {
+            id: '8',
+            nome: 'Hub USB-C 7 em 1',
+            descricao: 'Sem descrição',
+            preco: 259.90,
+            avalicao: 2,
+            categoria: 'Acessórios',
+            image: "about:blank"
         }
     ];
 

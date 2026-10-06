@@ -1,5 +1,6 @@
 <script lang=ts>
     import { onMount } from 'svelte';
+    import "./style.css"
     import * as Drawer from '#lib/components/ui/drawer/index.ts';
     import { Trash2, Plus, Minus, Edit, CheckCircle, ShoppingCart, Info, UtensilsCrossed, X } from 'lucide-svelte';
     import { Produto, Carrinho, Gerenciador, Pedido } from './classes.svelte';
@@ -10,6 +11,8 @@
     import { Label } from '#lib/components/ui/label';
     import { Badge } from '#lib/components/ui/badge';
     import * as Card from '#lib/components/ui/card/index.ts';
+    import * as Alert from "#lib/components/ui/alert/index.ts";
+    import * as Popover from "#lib/components/ui/popover/index.ts";
   
     // --- STATE & INTERACTIVITY ---
     let currentTime = $state('');
@@ -33,39 +36,12 @@
     // --- NEWS DATA (12 total items: 1 Hero + 3 Secondary + 8+ Grid Articles) ---
     const heroArticle = {
       id: 1,
-      title: 'Padrões da web em 2026: o que muda para quem desenvolve interfaces',
-      subtitle: 'Novas APIs de layout e recursos nativos do navegador prometem reduzir a dependência de bibliotecas externas e mudar a rotina de quem trabalha com front-end.',
-      category: 'Tecnologia',
-      author: 'Marina Alves',
-      date: '21 set 2026',
-      readTime: '6 min de leitura',
+      title: 'Tecnologia que acompanha o seu ritmo',
+      subtitle: 'Áudio, acessórios, e gadgets sleecionados com até 30% de desconto. Entrega rápida para todo o páis.',
+      category: 'Aduio',
       initial: 'T'
     };
-  
-    const topListArticles = [
-      {
-        id: 2,
-        title: 'Startups brasileiras de software crescem 18% no primeiro semestre',
-        category: 'Negócios',
-        date: '20 set'
-      },
-      {
-        id: 3,
-        title: 'Pesquisadores criam método mais eficiente para comprimir dados de sensores',
-        category: 'Ciência',
-        date: '20 set'
-      },
-      {
-        id: 4,
-        title: 'Museus digitais ganham espaço e repensam a visita',
-        category: 'Cultura',
-        date: '19 set'
-      }
-    ];
-  
-    
 
-    // Carrinho de compras
 
     const gerenciador = new Gerenciador();
     const carrinho = new Carrinho();    
@@ -109,36 +85,36 @@
     }
 
     // // --- OPERAÇÕES CRUD DE PRODUTOS --- //
-    // function salvarProduto(e: Event) {
-    //     e.preventDefault();
-    //     if (editando) {
-    //         gerenciador.atualizarProduto(formProduto.id, { ...formProduto });
-    //         mostrarFeedback('Produto atualizado com sucesso!');
-    //     } else {
-    //         const novoProduto = new Produto(
-    //             crypto.randomUUID(), formProduto.nome, formProduto.descricao, formProduto.preco, formProduto.categoria, formProduto.imagem, formProduto.avaliacao
-    //         );
-    //         gerenciador.adicionarProduto(novoProduto);
-    //         mostrarFeedback('Produto cadastrado com sucesso!');
-    //     }
-    //     formProduto = { id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '', avaliacao: 0 };
-    //     editando = false;
-    //     salvarDados();
-    // }
+    function salvarProduto(e: Event) {
+        e.preventDefault();
+        if (editando) {
+            gerenciador.atualizarProduto(formProduto.id, { ...formProduto });
+            mostrarFeedback('Produto atualizado com sucesso!');
+        } else {
+            const novoProduto = new Produto(
+                crypto.randomUUID(), formProduto.nome, formProduto.descricao, formProduto.preco, formProduto.categoria, formProduto.imagem, formProduto.avaliacao
+            );
+            gerenciador.adicionarProduto(novoProduto);
+            mostrarFeedback('Produto cadastrado com sucesso!');
+        }
+        formProduto = { id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '', avaliacao: 0 };
+        editando = false;
+        salvarDados();
+    }
 
-    // function prepararEdicao(produto: Produto) {
-    //     formProduto = { ...produto };
-    //     editando = true;
-    // }
+    function prepararEdicao(produto: Produto) {
+        formProduto = { ...produto };
+        editando = true;
+    }
 
-    // function removerProduto(id: string) {
-    //     if (confirm('Atenção: Tem certeza que deseja remover este produto do cardápio?')) {
-    //         gerenciador.removerProduto(id);
-    //         carrinho.removerItem(id);
-    //         salvarDados();
-    //         mostrarFeedback('Produto removido.');
-    //     }
-    // }
+    function removerProduto(id: string) {
+        if (confirm('Atenção: Tem certeza que deseja remover este produto do cardápio?')) {
+            gerenciador.removerProduto(id);
+            carrinho.removerItem(id);
+            salvarDados();
+            mostrarFeedback('Produto removido.');
+        }
+    }
 
     // --- OPERAÇÕES DO CARRINHO --- //
     function adicionarAoCarrinho(produto: Produto) {
@@ -154,10 +130,6 @@
     }
 
     function finalizarPedido() {
-        if (!nomeCliente.trim()) {
-            alert('Por favor, informe seu nome antes de finalizar o pedido.');
-            return;
-        }
         if (carrinho.itens.length === 0) {
             alert('Seu carrinho está vazio.');
             return;
@@ -309,92 +281,93 @@
           <Drawer.Trigger>
             <div class="flex items-center gap-2 font-semibold bg-secondary/10 text-primary px-4 py-2 rounded-full">
               <ShoppingCart class="h-5 w-5"/>
+              <div>{carrinho.itens.length}</div>
             </div>
           </Drawer.Trigger>
           <Drawer.Content>
             <Drawer.Header>
               <div class='flex justify-between'>
-                <Drawer.Title>Seu carrinho</Drawer.Title>
+                <Drawer.Title><span class="text-inter">Seu carrinho</span></Drawer.Title>
                 <Drawer.Close>
                   <div class="flex items-center gap-2 font-semibold bg-secondary/10 text-primary px-4 py-2 rounded-full">
                     <X class="h-5 w-5"/>
                   </div>
-                </Drawer.Close>
+                </Drawer.Close >
               </div>
             </Drawer.Header>
-            <ul>
-              {#if carrinho.itens.length === 0}
-                        <div class="text-center py-10 text-muted-foreground flex flex-col items-center">
-                            <div class="bg-muted p-4 rounded-full mb-4">
-                                <ShoppingCart class="h-8 w-8 opacity-50" />
-                            </div>
-                            <p class="font-medium">Seu carrinho está vazio.</p>
-                            <p class="text-sm">Adicione itens da loja para começar</p>
-                        </div>
-                    {:else}
-                        <div class="flex-1 overflow-y-auto max-h-[35vh] pr-2 space-y-4 mb-6 custom-scrollbar">
-                            {#each carrinho.itens as item}
-                                <div class="flex justify-between items-center group">
-                                    <div class="flex-1">
-                                        <p class="font-medium text-sm leading-tight">{item.produto.nome}</p>
-                                        <p class="text-muted-foreground text-xs mt-0.5">
-                                            {item.produto.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} un.
-                                        </p>
-                                    </div>
-                                    
-                                    <div class="flex items-center gap-2 bg-muted rounded-md p-1">
-                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-muted-foreground hover:text-foreground" onclick={() => carrinho.atualizarQuantidade(item.produto.id, item.quantidade - 1)}>
-                                            <Minus class="h-3 w-3" />
-                                        </Button>
-                                        <span class="font-medium text-sm w-4 text-center">{item.quantidade}</span>
-                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-muted-foreground hover:text-foreground" onclick={() => carrinho.atualizarQuantidade(item.produto.id, item.quantidade + 1)}>
-                                            <Plus class="h-3 w-3" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            {/each}
-                        </div>
+            <div class='drawer-content'>
+              <ul>
+                {#if carrinho.itens.length === 0}
+                          <div class="text-center py-10 text-muted-foreground flex flex-col items-center">
+                              <div class="bg-muted p-4 rounded-full mb-4">
+                                  <ShoppingCart class="h-8 w-8 opacity-50" />
+                              </div>
+                              <p class="font-medium">Seu carrinho está vazio.</p>
+                              <p class="text-sm">Adicione itens da loja para começar</p>
+                          </div>
+                      {:else}
+                          <div class="flex-1 overflow-y-auto max-h-[35vh] pr-2 space-y-4 mb-6 custom-scrollbar">
+                              {#each carrinho.itens as item}
+                                  <div class="flex justify-between items-center group">
+                                      <div class="flex-1">
+                                          <p class="font-medium text-sm leading-tight">{item.produto.nome}</p>
+                                          <p class="text-muted-foreground text-xs mt-0.5">
+                                              {item.produto.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} un.
+                                          </p>
+                                      </div>
+                                      
+                                      <div class="flex items-center gap-2 bg-muted rounded-md p-1">
+                                          <Button variant="ghost" size="icon" class="h-6 w-6 text-muted-foreground hover:text-foreground" onclick={() => carrinho.atualizarQuantidade(item.produto.id, item.quantidade - 1)}>
+                                              <Minus class="h-3 w-3" />
+                                          </Button>
+                                          <span class="font-medium text-sm w-4 text-center">{item.quantidade}</span>
+                                          <Button variant="ghost" size="icon" class="h-6 w-6 text-muted-foreground hover:text-foreground" onclick={() => carrinho.atualizarQuantidade(item.produto.id, item.quantidade + 1)}>
+                                              <Plus class="h-3 w-3" />
+                                          </Button>
+                                      </div>
+                                  </div>
+                              {/each}
+                          </div>
 
-                        <div class="space-y-6">
-                            <!-- Toggle de Entrega Personalizado (Estilo Segmented Control) -->
-                            <div class="flex bg-muted p-1 rounded-lg">
-                                <button class="flex-1 py-2 text-sm font-medium rounded-md transition-all {carrinho.tipoEntrega === 'local' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}" onclick={() => carrinho.tipoEntrega = 'local'}>
-                                    Retirar no Local
-                                </button>
-                                <button class="flex-1 py-2 text-sm font-medium rounded-md transition-all {carrinho.tipoEntrega === 'delivery' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}" onclick={() => carrinho.tipoEntrega = 'delivery'}>
-                                    Delivery (+R$ 2,50)
-                                </button>
-                            </div>
+                          <div class="space-y-6">
+                              <!-- Toggle de Entrega Personalizado (Estilo Segmented Control) -->
+                              <div class="flex bg-muted p-1 rounded-lg">
+                                  <button class="flex-1 py-2 text-sm font-medium rounded-md transition-all {carrinho.tipoEntrega === 'local' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}" onclick={() => carrinho.tipoEntrega = 'local'}>
+                                      Retirar no Local
+                                  </button>
+                                  <button class="flex-1 py-2 text-sm font-medium rounded-md transition-all {carrinho.tipoEntrega === 'delivery' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}" onclick={() => carrinho.tipoEntrega = 'delivery'}>
+                                      Delivery (+R$ 2,50)
+                                  </button>
+                              </div>
 
-                            <!-- Resumo Financeiro -->
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between text-muted-foreground">
-                                    <span>Subtotal</span>
-                                    <span>{carrinho.subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                                </div>
-                                {#if carrinho.tipoEntrega === 'delivery'}
-                                    <div class="flex justify-between text-primary font-medium">
-                                        <span>Taxa de Entrega</span>
-                                        <span>{carrinho.taxaEntrega.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                                    </div>
-                                {/if}
-                                <div class="flex justify-between text-xl font-bold text-foreground pt-4 border-t">
-                                    <span>Total</span>
-                                    <span>{carrinho.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                                </div>
-                            </div>
-
-                            <div class="space-y-2">
-                                <Label for="nomeCliente" class="sr-only">Seu Nome</Label>
-                                <Input id="nomeCliente" bind:value={nomeCliente} placeholder="Seu nome para o pedido" class="bg-muted/50" />
-                            </div>
-                        </div>
-                    {/if}
-            </ul>
+                              <!-- Resumo Financeiro -->
+                              <div class="space-y-2 text-sm">
+                                  <div class="flex justify-between text-muted-foreground">
+                                      <span>Subtotal</span>
+                                      <span>{carrinho.subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                  </div>
+                                  {#if carrinho.tipoEntrega === 'delivery'}
+                                      <div class="flex justify-between text-primary font-medium">
+                                          <span>Taxa de Entrega</span>
+                                          <span>{carrinho.taxaEntrega.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                      </div>
+                                  {/if}
+                                  <div class="flex justify-between text-xl font-bold text-foreground pt-4 border-t">
+                                      <span>Total</span>
+                                      <span>{carrinho.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                  </div>
+                              </div>
+                          </div>
+                      {/if}
+              </ul>
+            </div>
+            
             <Drawer.Footer>
-              <Button class="font-extrabold bg-primary">
-                Finalizar compra
-              </Button>
+              <Drawer.Close>
+                <Button class="font-extrabold bg-primary" onclick={finalizarPedido}>
+                  Finalizar compra
+                </Button>
+              </Drawer.Close>
             </Drawer.Footer>
           </Drawer.Content>
         </Drawer.Root>
@@ -403,38 +376,49 @@
     </header>
   
     <main class="container">
-      <!-- HERO SECTION: FEATURED ARTICLE + 3 NUMBERED SECONDARY ARTICLES -->
       <section class="hero-section" aria-label="Destaques principais">
         <article class="hero-main">
-          <div class="thumbnail hero-thumb">
-            <svg
-              viewBox="0 0 600 340"
-              role="img"
-              aria-label="Ilustração em gradiente da editoria {heroArticle.category} com a letra {heroArticle.initial}"
-            >
-              <defs>
-                <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#2563EB" />
-                  <stop offset="100%" stop-color="#611dfe" />
-                </linearGradient>
-              </defs>
-              <rect width="600" height="340" fill="url(#heroGrad)" rx="10" />
-              <circle cx="480" cy="110" r="145" fill="rgba(255,255,255,0.08)" />
-              <text x="48" y="255" font-size="220" font-weight="700" fill="#FFFFFF">
-                {heroArticle.initial}
-              </text>
-            </svg>
+          <div class="hero-section-inner">
+            <div>
+              <Card.Root>
+                <Card.Header>
+                  <Card.Title>
+                    <span class="badge-pill" style="background-color: {categoryColors[heroArticle.category]}">
+                      {heroArticle.category.toUpperCase()}
+                    </span>
+                    <h1 class="hero-title">{heroArticle.title}</h1>
+                  </Card.Title>
+                </Card.Header>
+                <Card.Content>
+                  <p class="hero-subtitle">{heroArticle.subtitle}</p>
+                  <Button onclick={() => window.location.hash = "1"} class="bg-primary w-full gap-2">
+                    Ver Oferta
+                  </Button>
+                </Card.Content>
+              </Card.Root>
+            </div>
+            <div>
+              <div class="thumbnail hero-thumb">
+                <svg
+                  viewBox="0 0 600 340"
+                  role="img"
+                  aria-label="Ilustração em gradiente {heroArticle.category} com a letra {heroArticle.initial}"
+                >
+                  <defs>
+                    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#2563EB" />
+                      <stop offset="100%" stop-color="#611dfe" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="600" height="340" fill="url(#heroGrad)" rx="10" />
+                  <circle cx="480" cy="110" r="145" fill="rgba(255,255,255,0.08)" />
+                  <text x="48" y="255" font-size="220" font-weight="700" fill="#FFFFFF">
+                    {heroArticle.initial}
+                  </text>
+                </svg>
+              </div>
+            </div> 
           </div>
-  
-          <span class="badge-pill" style="background-color: {categoryColors[heroArticle.category]}">
-            {heroArticle.category.toUpperCase()}
-          </span>
-  
-          <h1 class="hero-title">{heroArticle.title}</h1>
-          <p class="hero-subtitle">{heroArticle.subtitle}</p>
-          <p class="meta">
-            Por <strong>{heroArticle.author}</strong> · {heroArticle.date} · {heroArticle.readTime}
-          </p>
         </article>
   
         <!-- <aside class="hero-sidebar" aria-label="Mais lidas">
@@ -459,7 +443,7 @@
       <!-- LATEST NEWS SECTION: FILTER PILLS + RESPONSIVE CARD GRID -->
       <section class="latest-section" aria-labelledby="heading-ultimas">
         <div class="latest-header">
-          <h2 id="heading-ultimas" class="section-title">Últimas</h2>
+          <h2 id="heading-ultimas" class="section-title">Produtos</h2>
           <div class="filter-group" role="tablist" aria-label="Filtrar notícias por editoria">
             {#each categories as cat}
               <button
@@ -477,7 +461,7 @@
   
         {#if visibleProducts.length > 0}
           <div class="articles-grid">
-            {#each visibleProducts as produto (produto.id)}
+            {#each visibleProducts as produto, i (produto.id)}
               <Card.Root class="snap-center shrink-0 w-[350px] overflow-hidden group hover:shadow-md transition-all">
                   <div class="thumbnail card-thumb">
                     <svg
@@ -500,16 +484,25 @@
                   </div>
                   <Card.Content class="p-4 pt-5">
                       <Badge variant="secondary" class="mb-2">{produto.categoria}</Badge>
-                      <Card.Title class="text-lg line-clamp-1">{produto.nome}</Card.Title>
-                      
+                      <Card.Title class="text-lg line-clamp-1"><span id={String(i)} class=text-inter>{produto.nome}</span></Card.Title>
+                      <div class='flex gap-1'>
+                        {#each { length: 5 } as _, i}
+                            <span style="width: 10px; aspect-ratio: 1; border-radius: 1000px; background-color: {i + 1 < produto.avaliacao? "#F59E0B" : "#F3F4F6"}"></span>
+                        {/each}
+                      </div>
                       <p class="font-bold text-xl mt-2">
                           {produto.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </p>
                   </Card.Content>
                   <Card.Footer class="p-4 pt-0">
-                      <Button onclick={() => adicionarAoCarrinho(produto)} class="w-full gap-2 bg-primary">
-                          <Plus class="h-4 w-4" /> Adicionar
-                      </Button>
+                      <Popover.Root>
+                        <Popover.Trigger class='w-full'>
+                          <Button onclick={() => adicionarAoCarrinho(produto)} class="w-full gap-2">
+                            <Plus class="h-4 w-4" /> Adicionar
+                          </Button>
+                        </Popover.Trigger>
+                        <Popover.Content>Item adicionado ao carrinho</Popover.Content>
+                      </Popover.Root>
                   </Card.Footer>
               </Card.Root>
             {/each}
@@ -569,7 +562,7 @@
           </div>
   
           <!-- Sitemap / Links -->
-          <div class="flex flex-col gap-4">
+          <!-- <div class="flex flex-col gap-4">
             <h3 class="font-semibold text-foreground">Links Rápidos</h3>
             <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
               <li>
@@ -588,7 +581,7 @@
                 <a href="/ingressos" class="hover:text-foreground transition-colors">Ingressos</a>
               </li>
             </ul>
-          </div>
+          </div> -->
   
           <!-- Contact Info -->
           <div class="flex flex-col gap-4">
@@ -628,577 +621,3 @@
       </div>
     </footer>
   </div>
-  
-  <style>
-    /* --- CSS CUSTOM PROPERTIES (SPEC PALETTE & TYPOGRAPHY) --- */
-    .portal-wrapper {
-      --paper: #FFFFFF;
-      --ink: #181A2A;
-      --slate: #6B7280;
-      --mist: #E5E7EB;
-      --line: #e7e5eb;
-      --signal: #6D28D9;
-  
-      --font-serif: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  
-      background-color: var(--paper);
-      color: var(--ink);
-      font-family: var(--font-sans);
-      min-height: 100vh;
-      transition: background-color 0.25s ease, color 0.25s ease;
-    }
-  
-    /* Dark Theme Overrides */
-    .portal-wrapper[data-theme="dark"] {
-      --paper: #0F1115;
-      --ink: #F3F4F6;
-      --slate: #9CA3AF;
-      --mist: #1E222B;
-      --line: #2D3340;
-      --signal: #EF4444;
-    }
-  
-    :global(body) {
-      margin: 0;
-      padding: 0;
-      -webkit-font-smoothing: antialiased;
-    }
-  
-    * {
-      box-sizing: border-box;
-    }
-  
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-  
-    /* Visible Focus States for Accessibility */
-    a:focus-visible,
-    button:focus-visible,
-    input:focus-visible {
-      outline: 2px solid var(--signal);
-      outline-offset: 2px;
-    }
-  
-    .container {
-      max-width: 1060px;
-      margin: 0 auto;
-      padding: 0 1.25rem;
-    }
-  
-    /* --- 1. TOP BAR --- */
-    .topbar {
-      border-bottom: 1px solid var(--line);
-      font-size: 0.78rem;
-      padding: 0.45rem 0;
-    }
-  
-    .topbar-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  
-    .live-status {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-  
-    .live-indicator {
-      color: var(--signal);
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      font-size: 0.72rem;
-    }
-  
-    .clock-text {
-      color: var(--slate);
-    }
-  
-    .theme-btn {
-      background: transparent;
-      border: 1px solid var(--line);
-      color: var(--slate);
-      border-radius: 999px;
-      padding: 0.22rem 0.75rem;
-      font-size: 0.75rem;
-      font-family: var(--font-sans);
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-  
-    .theme-btn:hover {
-      border-color: var(--ink);
-      color: var(--ink);
-    }
-  
-    /* --- 2. STICKY MASTHEAD --- */
-    .masthead {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background-color: var(--paper);
-      border-bottom: 1px solid var(--line);
-      padding: 0.9rem 0;
-      transition: background-color 0.25s ease;
-    }
-  
-    .masthead-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-    }
-  
-    .brand-nav {
-      display: flex;
-      align-items: center;
-      gap: 2.2rem;
-    }
-  
-    .logo {
-      font-family: var(--font-serif);
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--ink);
-    }
-  
-    .logo-dot {
-      color: var(--signal);
-    }
-  
-    .nav-links {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      gap: 1.4rem;
-    }
-  
-    .nav-links a {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--ink);
-      transition: color 0.15s;
-    }
-  
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--signal);
-    }
-  
-    .search-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-  
-    .search-icon {
-      position: absolute;
-      left: 0.75rem;
-      color: var(--slate);
-      pointer-events: none;
-    }
-  
-    .search-box input {
-      background-color: var(--mist);
-      border: 1px solid transparent;
-      border-radius: 999px;
-      padding: 0.45rem 1rem 0.45rem 2.2rem;
-      font-size: 0.82rem;
-      color: var(--ink);
-      font-family: var(--font-sans);
-      width: 215px;
-      transition: border-color 0.2s, width 0.2s;
-    }
-  
-    .search-box input:focus {
-      border-color: var(--slate);
-      outline: none;
-    }
-  
-    /* --- 3. HERO SECTION --- */
-    .hero-section {
-      display: grid;
-      grid-template-columns: 1.65fr 1fr;
-      gap: 2.75rem;
-      padding: 2.25rem 0 2rem;
-      align-items: start;
-    }
-  
-    .thumbnail svg {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 8px;
-    }
-  
-    .hero-thumb {
-      margin-bottom: 1rem;
-    }
-  
-    .badge-pill {
-      display: inline-block;
-      color: #FFFFFF;
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 0.25rem 0.55rem;
-      border-radius: 4px;
-      letter-spacing: 0.04em;
-      margin-bottom: 0.75rem;
-    }
-  
-    .hero-title {
-      font-family: var(--font-serif);
-      font-size: 2.35rem;
-      line-height: 1.12;
-      margin: 0 0 0.85rem 0;
-      font-weight: 700;
-      letter-spacing: -0.015em;
-    }
-  
-    .hero-subtitle {
-      color: var(--slate);
-      font-size: 0.96rem;
-      line-height: 1.55;
-      margin: 0 0 1rem 0;
-    }
-  
-    .meta {
-      color: var(--slate);
-      font-size: 0.76rem;
-      margin: 0;
-    }
-  
-    .meta strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-  
-    .numbered-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-  
-    .numbered-item {
-      display: flex;
-      gap: 1rem;
-      padding: 1.15rem 0;
-      border-bottom: 1px solid var(--line);
-    }
-  
-    .numbered-item:first-child {
-      padding-top: 0.25rem;
-    }
-  
-    .numbered-item:last-child {
-      border-bottom: none;
-    }
-  
-    .item-number {
-      font-family: var(--font-serif);
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--signal);
-      line-height: 1.2;
-      min-width: 1.1rem;
-    }
-  
-    .item-title {
-      font-family: var(--font-serif);
-      font-size: 1.02rem;
-      font-weight: 700;
-      line-height: 1.35;
-      margin: 0 0 0.35rem 0;
-    }
-  
-    .item-title a:hover {
-      color: var(--signal);
-    }
-  
-    .section-divider {
-      border: 0;
-      border-top: 1px solid var(--line);
-      margin: 0.5rem 0 2rem;
-    }
-  
-    /* --- 4. LATEST SECTION & GRID --- */
-    .latest-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-  
-    .section-title {
-      font-family: var(--font-serif);
-      font-size: 1.45rem;
-      margin: 0;
-      font-weight: 700;
-    }
-  
-    .filter-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-    }
-  
-    .filter-pill {
-      background: transparent;
-      border: 1px solid var(--line);
-      color: var(--slate);
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-family: var(--font-sans);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-  
-    .filter-pill:hover {
-      border-color: var(--ink);
-      color: var(--ink);
-    }
-  
-    .filter-pill.active {
-      background-color: var(--ink);
-      color: var(--paper);
-      border-color: var(--ink);
-      font-weight: 500;
-    }
-  
-    .articles-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.75rem 1.35rem;
-    }
-  
-    .news-card {
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.2s ease;
-    }
-  
-    .news-card:hover {
-      transform: translateY(-2px);
-    }
-  
-    .card-thumb {
-      margin-bottom: 0.65rem;
-    }
-  
-    .category-bar {
-      color: #FFFFFF;
-      font-size: 0.66rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      margin-bottom: 0.6rem;
-    }
-  
-    .card-title {
-      font-family: var(--font-serif);
-      font-size: 1.06rem;
-      line-height: 1.32;
-      margin: 0 0 0.55rem 0;
-      font-weight: 700;
-    }
-  
-    .card-title a:hover {
-      color: var(--signal);
-    }
-  
-    .empty-results {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--slate);
-    }
-  
-    .load-more-container {
-      display: flex;
-      justify-content: center;
-      margin: 2.5rem 0 1rem;
-    }
-  
-    .load-more-btn {
-      background: transparent;
-      border: 1px solid var(--ink);
-      color: var(--ink);
-      border-radius: 999px;
-      padding: 0.65rem 1.65rem;
-      font-size: 0.84rem;
-      font-weight: 600;
-      font-family: var(--font-sans);
-      cursor: pointer;
-      transition: background-color 0.2s, color 0.2s;
-    }
-  
-    .load-more-btn:hover {
-      background-color: var(--ink);
-      color: var(--paper);
-    }
-  
-    /* --- 5. NEWSLETTER SECTION --- */
-    .newsletter-box {
-      background-color: #15171A;
-      color: #FFFFFF;
-      border-radius: 12px;
-      padding: 3.25rem 1.5rem;
-      margin: 3.5rem 0;
-      text-align: center;
-    }
-  
-    .newsletter-title {
-      font-family: var(--font-serif);
-      font-size: 1.65rem;
-      margin: 0 0 0.6rem 0;
-    }
-  
-    .newsletter-desc {
-      color: #9CA3AF;
-      font-size: 0.88rem;
-      line-height: 1.55;
-      margin: 0 0 1.6rem 0;
-    }
-  
-    .newsletter-form {
-      display: flex;
-      justify-content: center;
-      gap: 0.65rem;
-      max-width: 430px;
-      margin: 0 auto;
-    }
-  
-    .newsletter-form input {
-      flex: 1;
-      background-color: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: #FFFFFF;
-      border-radius: 999px;
-      padding: 0.65rem 1.15rem;
-      font-size: 0.85rem;
-      font-family: var(--font-sans);
-    }
-  
-    .newsletter-form input::placeholder {
-      color: #9CA3AF;
-    }
-  
-    .btn-subscribe {
-      background-color: var(--signal);
-      color: #FFFFFF;
-      border: none;
-      border-radius: 999px;
-      padding: 0.65rem 1.4rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      font-family: var(--font-sans);
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-  
-    .btn-subscribe:hover {
-      opacity: 0.9;
-    }
-  
-    .newsletter-feedback {
-      margin: 1rem 0 0;
-      font-size: 0.82rem;
-    }
-  
-    .newsletter-feedback.ok {
-      color: #34D399;
-    }
-  
-    .newsletter-feedback.err {
-      color: #F87171;
-    }
-  
-    /* --- 6. FOOTER --- */
-    .site-footer {
-      border-top: 1px solid var(--line);
-      padding: 1.75rem 0;
-      font-size: 0.78rem;
-      color: var(--slate);
-    }
-  
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-  
-    .copyright {
-      margin: 0;
-    }
-  
-    .footer-links {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      gap: 1.35rem;
-    }
-  
-    .footer-links a:hover {
-      color: var(--ink);
-    }
-  
-    /* --- RESPONSIVE MEDIA QUERIES --- */
-    @media (max-width: 900px) {
-      .hero-section {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-  
-      .articles-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-  
-    @media (max-width: 640px) {
-      .masthead-inner {
-        flex-direction: column;
-        align-items: stretch;
-      }
-  
-      .brand-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-      }
-  
-      .nav-links {
-        flex-wrap: wrap;
-        gap: 0.85rem;
-      }
-  
-      .search-box input {
-        width: 100%;
-      }
-  
-      .hero-title {
-        font-size: 1.85rem;
-      }
-  
-      .articles-grid {
-        grid-template-columns: 1fr;
-      }
-  
-      .newsletter-form {
-        flex-direction: column;
-      }
-    }
-  </style>
