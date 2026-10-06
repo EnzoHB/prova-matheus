@@ -1,5 +1,5 @@
 
-    .hero-section-inner {
+.hero-section-inner {
       display: grid;
       grid-template-columns: 0.8fr 1fr;
       gap: 2.75rem;
@@ -152,10 +152,6 @@
       color: var(--ink);
     }
   
-    .logo-dot {
-      color: var(--signal);
-    }
-  
     .nav-links {
       display: flex;
       list-style: none;
@@ -253,61 +249,6 @@
       margin: 0 0 1rem 0;
     }
   
-    .meta {
-      color: var(--slate);
-      font-size: 0.76rem;
-      margin: 0;
-    }
-  
-    .meta strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-  
-    .numbered-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-  
-    .numbered-item {
-      display: flex;
-      gap: 1rem;
-      padding: 1.15rem 0;
-      border-bottom: 1px solid var(--line);
-    }
-  
-    .numbered-item:first-child {
-      padding-top: 0.25rem;
-    }
-  
-    .numbered-item:last-child {
-      border-bottom: none;
-    }
-  
-    .item-number {
-      font-family: var(--font-serif);
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--signal);
-      line-height: 1.2;
-      min-width: 1.1rem;
-    }
-  
-    .item-title {
-      font-family: var(--font-serif);
-      font-size: 1.02rem;
-      font-weight: 700;
-      line-height: 1.35;
-      margin: 0 0 0.35rem 0;
-    }
-  
-    .item-title a:hover {
-      color: var(--signal);
-    }
-  
     .section-divider {
       border: 0;
       border-top: 1px solid var(--line);
@@ -367,42 +308,10 @@
       gap: 1.75rem 1.35rem;
     }
   
-    .news-card {
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.2s ease;
-    }
-  
-    .news-card:hover {
-      transform: translateY(-2px);
-    }
-  
     .card-thumb {
       margin-bottom: 0.65rem;
     }
-  
-    .category-bar {
-      color: #FFFFFF;
-      font-size: 0.66rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      margin-bottom: 0.6rem;
-    }
-  
-    .card-title {
-      font-family: var(--font-serif);
-      font-size: 1.06rem;
-      line-height: 1.32;
-      margin: 0 0 0.55rem 0;
-      font-weight: 700;
-    }
-  
-    .card-title a:hover {
-      color: var(--signal);
-    }
-  
+
     .empty-results {
       text-align: center;
       padding: 3rem 1rem;
@@ -509,39 +418,7 @@
       color: #F87171;
     }
   
-    /* --- 6. FOOTER --- */
-    .site-footer {
-      border-top: 1px solid var(--line);
-      padding: 1.75rem 0;
-      font-size: 0.78rem;
-      color: var(--slate);
-    }
-  
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-  
-    .copyright {
-      margin: 0;
-    }
-  
-    .footer-links {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      gap: 1.35rem;
-    }
-  
-    .footer-links a:hover {
-      color: var(--ink);
-    }
-  
-    /* --- RESPONSIVE MEDIA QUERIES --- */
+    /* --- MEDIA QUERIES --- */
     @media (max-width: 900px) {
       .hero-section {
         grid-template-columns: 1fr;

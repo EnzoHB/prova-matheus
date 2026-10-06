@@ -2,11 +2,11 @@
     import { onMount } from 'svelte';
     import "./style.css"
     import * as Drawer from '#lib/components/ui/drawer/index.ts';
-    import { Trash2, Plus, Minus, Edit, CheckCircle, ShoppingCart, Info, UtensilsCrossed, X } from 'lucide-svelte';
+    import { Plus, Minus, ShoppingCart, X } from 'lucide-svelte';
     import { Produto, Carrinho, Gerenciador, Pedido } from './classes.svelte';
 
-    import { Button } from '#lib/components/ui/button';
-    import { Input } from '#lib/components/ui/input';
+    import { Button } from '#lib/components/ui/button'; 
+    import { Input } from '#lib/components/ui/input'; 
     import { Textarea } from '#lib/components/ui/textarea';
     import { Label } from '#lib/components/ui/label';
     import { Badge } from '#lib/components/ui/badge';
@@ -33,8 +33,7 @@
       'Vestível ': '#B8348F',
     };
   
-    // --- NEWS DATA (12 total items: 1 Hero + 3 Secondary + 8+ Grid Articles) ---
-    const heroArticle = {
+    const heroCallout = {
       id: 1,
       title: 'Tecnologia que acompanha o seu ritmo',
       subtitle: 'Áudio, acessórios, e gadgets sleecionados com até 30% de desconto. Entrega rápida para todo o páis.',
@@ -46,19 +45,19 @@
     const gerenciador = new Gerenciador();
     const carrinho = new Carrinho();    
 
-    let formProduto = $state({ id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '', avaliacao: 0 });
-    let editando = $state(false);
-
-    // Estado do cliente
     let nomeCliente = $state('');
     let feedbackMsg = $state('');
 
     onMount(async () => {
         const dadosLocais = localStorage.getItem('volt_dados');
         if (dadosLocais) {
-            const { produtos, pedidos } = JSON.parse(dadosLocais);
+            const { produtos, pedidos, itens } = JSON.parse(dadosLocais);
             gerenciador.produtos = produtos.map((p: any) => new Produto(p.id, p.nome, p.descricao, p.preco, p.categoria, p.imagem, p.avaliacao));
             gerenciador.pedidos = pedidos;
+            for (let produto of gerenciador.produtos) {
+              carrinho.adicionarItem(produto);
+            }
+    
         } else {
             // Se não houver cache, busca os dados da API (+server.ts)
             try {
@@ -75,58 +74,19 @@
     function salvarDados() {
         localStorage.setItem('volt_dados', JSON.stringify({
             produtos: gerenciador.produtos,
-            pedidos: gerenciador.pedidos
+            pedidos: gerenciador.pedidos,
+            itens: carrinho.itens
         }));
     }
 
     function mostrarFeedback(msg: string) {
         feedbackMsg = msg;
-        setTimeout(() => feedbackMsg = '', 3000);
+        alert(feedbackMsg)
     }
 
-    // // --- OPERAÇÕES CRUD DE PRODUTOS --- //
-    function salvarProduto(e: Event) {
-        e.preventDefault();
-        if (editando) {
-            gerenciador.atualizarProduto(formProduto.id, { ...formProduto });
-            mostrarFeedback('Produto atualizado com sucesso!');
-        } else {
-            const novoProduto = new Produto(
-                crypto.randomUUID(), formProduto.nome, formProduto.descricao, formProduto.preco, formProduto.categoria, formProduto.imagem, formProduto.avaliacao
-            );
-            gerenciador.adicionarProduto(novoProduto);
-            mostrarFeedback('Produto cadastrado com sucesso!');
-        }
-        formProduto = { id: '', nome: '', descricao: '', preco: 0, categoria: '', imagem: '', avaliacao: 0 };
-        editando = false;
-        salvarDados();
-    }
-
-    function prepararEdicao(produto: Produto) {
-        formProduto = { ...produto };
-        editando = true;
-    }
-
-    function removerProduto(id: string) {
-        if (confirm('Atenção: Tem certeza que deseja remover este produto do cardápio?')) {
-            gerenciador.removerProduto(id);
-            carrinho.removerItem(id);
-            salvarDados();
-            mostrarFeedback('Produto removido.');
-        }
-    }
-
-    // --- OPERAÇÕES DO CARRINHO --- //
     function adicionarAoCarrinho(produto: Produto) {
         carrinho.adicionarItem(produto);
-        mostrarFeedback(`${produto.nome} adicionado!`);
-    }
-
-    function limparCarrinho() {
-        if (confirm('Deseja realmente esvaziar seu carrinho?')) {
-            carrinho.limpar();
-            mostrarFeedback('Carrinho esvaziado.');
-        }
+        salvarDados();
     }
 
     function finalizarPedido() {
@@ -138,17 +98,12 @@
         const pedido = new Pedido(nomeCliente, carrinho.itens, carrinho.tipoEntrega, 'Pendente', carrinho.total);
         gerenciador.adicionarPedido(pedido);
         carrinho.limpar();
+        localStorage.clear();
         nomeCliente = '';
         salvarDados();
         mostrarFeedback('Pedido finalizado com sucesso!');
     }
-    
-
-
-
-    // -- Carrinho de compras
   
-    // --- REACTIVE FILTERING (Category + Live Search) ---
     let filteredProducts = $derived(gerenciador.produtos.filter(produto => {
       const matchesCat = selectedCategory === 'Todas' || produto.categoria === selectedCategory;
       const matchesSearch = produto.nome.toLowerCase().includes(searchQuery.toLowerCase().trim());
@@ -157,7 +112,6 @@
   
     let visibleProducts = $derived(filteredProducts.slice(0, visibleCount));
   
-    // --- FUNCTIONS ---
     function updateClock() {
       const now = new Date();
       const datePart = now.toLocaleDateString('pt-BR', {
@@ -172,7 +126,7 @@
   
     function toggleTheme() {
       theme = theme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('latencia-theme', theme);
+      localStorage.setItem('volt-theme', theme);
     }
   
     function selectCategory(cat) {
@@ -200,9 +154,7 @@
     onMount(() => {
       updateClock();
       const interval = setInterval(updateClock, 1000);
-  
-      // Check saved theme or system preference (Bonus + Spec requirement)
-      const savedTheme = localStorage.getItem('latencia-theme');
+      const savedTheme = localStorage.getItem('volt-theme');
       if (savedTheme) {
         theme = savedTheme;
       } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -222,7 +174,7 @@
   </svelte:head>
   
   <div class="portal-wrapper" data-theme={theme}>
-    <!-- TOP BAR: LIVE BADGE, CLOCK, THEME BUTTON -->
+    <!-- LIVE BADGE, CLOCK, THEME BUTTON -->
     <div class="topbar">
       <div class="container topbar-inner">
         <div class="live-status">
@@ -232,7 +184,7 @@
       </div>
     </div>
   
-    <!-- STICKY MASTHEAD: LOGO, NAV, LIVE SEARCH -->
+    <!-- MASTER HEAD -->
     <header class="masthead">
       <div class="container masthead-inner">
         <div class="brand-nav">
@@ -330,7 +282,7 @@
                           </div>
 
                           <div class="space-y-6">
-                              <!-- Toggle de Entrega Personalizado (Estilo Segmented Control) -->
+                              <!-- Toggle -->
                               <div class="flex bg-muted p-1 rounded-lg">
                                   <button class="flex-1 py-2 text-sm font-medium rounded-md transition-all {carrinho.tipoEntrega === 'local' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}" onclick={() => carrinho.tipoEntrega = 'local'}>
                                       Retirar no Local
@@ -383,14 +335,14 @@
               <Card.Root>
                 <Card.Header>
                   <Card.Title>
-                    <span class="badge-pill" style="background-color: {categoryColors[heroArticle.category]}">
-                      {heroArticle.category.toUpperCase()}
+                    <span class="badge-pill" style="background-color: {categoryColors[heroCallout.category]}">
+                      {heroCallout.category.toUpperCase()}
                     </span>
-                    <h1 class="hero-title">{heroArticle.title}</h1>
+                    <h1 class="hero-title">{heroCallout.title}</h1>
                   </Card.Title>
                 </Card.Header>
                 <Card.Content>
-                  <p class="hero-subtitle">{heroArticle.subtitle}</p>
+                  <p class="hero-subtitle">{heroCallout.subtitle}</p>
                   <Button onclick={() => window.location.hash = "1"} class="bg-primary w-full gap-2">
                     Ver Oferta
                   </Button>
@@ -402,7 +354,7 @@
                 <svg
                   viewBox="0 0 600 340"
                   role="img"
-                  aria-label="Ilustração em gradiente {heroArticle.category} com a letra {heroArticle.initial}"
+                  aria-label="Ilustração em gradiente {heroCallout.category} com a letra {heroCallout.initial}"
                 >
                   <defs>
                     <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -413,38 +365,21 @@
                   <rect width="600" height="340" fill="url(#heroGrad)" rx="10" />
                   <circle cx="480" cy="110" r="145" fill="rgba(255,255,255,0.08)" />
                   <text x="48" y="255" font-size="220" font-weight="700" fill="#FFFFFF">
-                    {heroArticle.initial}
+                    {heroCallout.initial}
                   </text>
                 </svg>
               </div>
             </div> 
           </div>
         </article>
-  
-        <!-- <aside class="hero-sidebar" aria-label="Mais lidas">
-          <ol class="numbered-list">
-            {#each topListArticles as item, idx}
-              <li class="numbered-item">
-                <span class="item-number">{idx + 1}</span>
-                <div class="item-body">
-                  <h2 class="item-title">
-                    <a href="#artigo-{item.id}">{item.title}</a>
-                  </h2>
-                  <span class="meta">{item.category} · {item.date}</span>
-                </div>
-              </li>
-            {/each}Tec
-          </ol>
-        </aside> -->
       </section>
   
       <hr class="section-divider" />
   
-      <!-- LATEST NEWS SECTION: FILTER PILLS + RESPONSIVE CARD GRID -->
       <section class="latest-section" aria-labelledby="heading-ultimas">
         <div class="latest-header">
           <h2 id="heading-ultimas" class="section-title">Produtos</h2>
-          <div class="filter-group" role="tablist" aria-label="Filtrar notícias por editoria">
+          <div class="filter-group" role="tablist" aria-label="Filtrar produtos por categoria">
             {#each categories as cat}
               <button
                 class="filter-pill"
@@ -509,7 +444,7 @@
           </div>
         {:else}
           <p class="empty-results">
-            Nenhuma matéria encontrada para "<strong>{searchQuery}</strong>" na editoria <strong>{selectedCategory}</strong>.
+            Nenhum produto encontrado para "<strong>{searchQuery}</strong>" na volt <strong>{selectedCategory}</strong>.
           </p>
         {/if}
   
@@ -522,7 +457,7 @@
         {/if}
       </section>
   
-      <!-- NEWSLETTER SECTION: REGEX EMAIL VALIDATION + FEEDBACK -->
+      <!-- OFFER SECTION -->
       <section class="newsletter-box bg-secondary" aria-labelledby="heading-newsletter">
         <h2 id="heading-newsletter" class="newsletter-title">Ganhe 10% na primeira compra</h2>
         <p class="newsletter-desc">
@@ -561,28 +496,6 @@
             </p>
           </div>
   
-          <!-- Sitemap / Links -->
-          <!-- <div class="flex flex-col gap-4">
-            <h3 class="font-semibold text-foreground">Links Rápidos</h3>
-            <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
-              <li>
-                <a href="/cardapio" class="hover:text-foreground transition-colors">Cardápio</a>
-              </li>
-              <li>
-                <a href="/evento" class="hover:text-foreground transition-colors">Evento</a>
-              </li>
-              <li>
-                <a href="/galeria" class="hover:text-foreground transition-colors">Galeria</a>
-              </li>
-              <li>
-                <a href="/culinaria" class="hover:text-foreground transition-colors">Galeria</a>
-              </li>
-              <li>
-                <a href="/ingressos" class="hover:text-foreground transition-colors">Ingressos</a>
-              </li>
-            </ul>
-          </div> -->
-  
           <!-- Contact Info -->
           <div class="flex flex-col gap-4">
             <h3 class="font-semibold text-foreground">Contato</h3>
@@ -612,10 +525,10 @@
   
         <!-- Bottom Bar -->
         <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-sm text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} Enzo. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Volt. Todos os direitos reservados.</p>
           <div class="flex gap-4">
-            <a href="/termos" class="hover:text-foreground transition-colors">Termos de Uso</a>
-            <a href="/privacidade" class="hover:text-foreground transition-colors">Privacidade</a>
+            <a href="/" class="hover:text-foreground transition-colors">Termos de Uso</a>
+            <a href="/" class="hover:text-foreground transition-colors">Privacidade</a>
           </div>
         </div>
       </div>
