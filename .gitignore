@@ -170,3 +170,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+*.md
+.agents/
+.vscode/
+

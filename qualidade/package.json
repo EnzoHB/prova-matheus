@@ -1,0 +1,15 @@
+{
+  "name": "qualidade",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13"
+  },
+  "devDependencies": {
+    "eslint": "^9.30.0",
+    "jest": "^30.0.0"
+  }
+}

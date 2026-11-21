@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web2 Loja</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 0 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: left;
+      }
+      form {
+        margin: 10px 0;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      #msg {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Produtos</h1>
+
+    <form id="form-produto">
+      <input name="nome" placeholder="Nome" required />
+      <input name="preco" type="number" step="0.01" placeholder="Preço" required />
+      <input name="estoque" type="number" placeholder="Estoque" />
+      <button>Adicionar</button>
+    </form>
+
+    <input id="busca" placeholder="Buscar produto..." />
+    <p id="msg"></p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tabela"></tbody>
+    </table>
+
+    <h2>Categorias</h2>
+    <form id="form-categoria">
+      <input name="nome" placeholder="Nova categoria" required />
+      <button>Adicionar</button>
+    </form>
+    <ul id="categorias"></ul>
+
+    <script>
+      const tabela = document.getElementById('tabela')
+      const msg = document.getElementById('msg')
+      const busca = document.getElementById('busca')
+      const formProduto = document.getElementById('form-produto')
+      const formCategoria = document.getElementById('form-categoria')
+      const listaCategorias = document.getElementById('categorias')
+
+      async function carregar() {
+        const resp = await fetch('/produtos?busca=' + encodeURIComponent(busca.value))
+        const produtos = await resp.json()
+        tabela.innerHTML = ''
+        for (const p of produtos) {
+          const tr = document.createElement('tr')
+          const tdId = document.createElement('td')
+          tdId.textContent = p.id
+          const tdNome = document.createElement('td')
+          tdNome.textContent = p.nome
+          const tdPreco = document.createElement('td')
+          tdPreco.textContent = Number(p.preco).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          })
+          const tdEstoque = document.createElement('td')
+          tdEstoque.textContent = p.estoque
+          const tdBotao = document.createElement('td')
+          const botao = document.createElement('button')
+          botao.textContent = 'Excluir'
+          botao.addEventListener('click', () => excluir(p.id))
+          tdBotao.appendChild(botao)
+          tr.append(tdId, tdNome, tdPreco, tdEstoque, tdBotao)
+          tabela.appendChild(tr)
+        }
+      }
+
+      async function excluir(id) {
+        if (!confirm('Excluir o produto ' + id + '?')) return
+        const resp = await fetch('/produtos/' + id, { method: 'DELETE' })
+        if (!resp.ok) msg.textContent = 'Não foi possível excluir'
+        carregar()
+      }
+
+      async function carregarCategorias() {
+        const resp = await fetch('/categorias')
+        const categorias = await resp.json()
+        listaCategorias.innerHTML = ''
+        for (const c of categorias) {
+          const li = document.createElement('li')
+          li.textContent = c.nome
+          listaCategorias.appendChild(li)
+        }
+      }
+
+      formProduto.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        const d = Object.fromEntries(new FormData(formProduto))
+        const resp = await fetch('/produtos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(d),
+        })
+        if (!resp.ok) {
+          const erro = await resp.json()
+          msg.textContent = erro.erro
+          return
+        }
+        msg.textContent = ''
+        formProduto.reset()
+        carregar()
+      })
+
+      formCategoria.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        const d = Object.fromEntries(new FormData(formCategoria))
+        await fetch('/categorias', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(d),
+        })
+        formCategoria.reset()
+        carregarCategorias()
+      })
+
+      busca.addEventListener('input', carregar)
+
+      carregar()
+      carregarCategorias()
+    </script>
+  </body>
+</html>
